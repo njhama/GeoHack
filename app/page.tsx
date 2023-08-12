@@ -26,13 +26,23 @@ export default function Home() {
     const map_zoom = 3;
     mapboxgl.accessToken = API_KEY1;
 
-    console.log("JHERERE11")
+    console.log("JHERERE111")
+
+    //Create new map
     const map = new mapboxgl.Map({
       container: 'map',
       style: map_mapbox_style,
       center: [0, 0],
       zoom: map_zoom
     });
+
+    //scokets
+    const socket = io("ws://localhost:3003", { transports : ['websocket'] })
+    socket.on('connect', function() {
+      console.log("connected")
+  });
+
+
 
     //this will run afterwards
     return () => {

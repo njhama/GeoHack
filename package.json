@@ -19,6 +19,7 @@
     "koa-static": "^5.0.0",
     "mapbox": "^1.0.0-beta10",
     "mapbox-gl": "^2.15.0",
+    "mongoose": "^7.4.3",
     "next": "^13.4.13",
     "postcss": "8.4.27",
     "puppeteer": "^21.0.3",

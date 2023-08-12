@@ -6,14 +6,19 @@ const io = require('socket.io')(server);
 // Serve static files (if needed)
 app.use(require('koa-static')(__dirname + '/public'));
 
+//mongodb config
+const mongoose = require('mongoose');
+mongoose.connect('mongodb://localhost:27017/GeoHack', { useNewUrlParser: true, useUnifiedTopology: true });
+
+const Coordinate = mongoose.model('Coordinate', {
+    latitude: Number,
+    longitude: Number,
+    timestamp: Date
+  });
+
 // Set up Socket.IO connection
 io.on('connection', (socket) => {
   console.log('A user connected');
-
-  socket.on('message', (data) => {
-    console.log('Received message:', data);
-    io.emit('message', data); // Broadcast the message to all connected clients
-  });
 
   socket.on('disconnect', () => {
     console.log('User disconnected');

@@ -41,7 +41,7 @@ async function start() {
                 width: 1000,
                 height: 1000
             });
-
+            saveCoordinate();
             page.on("response", async (response) => {
                 if (response.url().includes("GeoPhotoService")) {
                     const location = await response.text();
@@ -56,6 +56,7 @@ async function start() {
                         let newDate = new Date().toLocaleTimeString();
                         io.emit("coords", `${long},${lat}`);
                         console.log(`[${newDate}] Latitude: ${lat} Longitude: ${long}`);
+                        saveCoordinate(long, lat)
                     }
                 }
             });
@@ -65,6 +66,23 @@ async function start() {
                 timeout: 0
             });
         });
+}
+
+const Coordinate = require('./packet.js')
+async function saveCoordinate(long, lat)
+{
+    const newCoordinate = new Coordinate({
+        latitude: lat,
+        longitude: long,
+        timestamp: new Date(),
+      });
+    
+      try {
+        const savedCoordinate = await newCoordinate.save();
+        console.log('Coordinate saved:', savedCoordinate);
+      } catch (error) {
+        console.error('Error saving coordinate:', error);
+      }
 }
 
 //Database config

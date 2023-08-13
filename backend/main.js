@@ -41,7 +41,7 @@ async function start() {
                 width: 1000,
                 height: 1000
             });
-            saveCoordinate();
+            //saveCoordinate();
             page.on("response", async (response) => {
                 if (response.url().includes("GeoPhotoService")) {
                     const location = await response.text();

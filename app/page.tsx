@@ -115,9 +115,9 @@ export default function Home() {
       <pre id="ascii_title">
         {/* ASCII art title */}
       </pre>
-      <p id="serverStatus">Server Stadtus: No1t Connecte123123d1</p>
+      <h1>GeoHack</h1>
       <div className="maps">
-        <div id="map" style={{ width: '60%', height: '600px', display: 'inline-block' }} />
+        <div id="map" style={{ width: '80%', height: '600px', display: 'inline-block'}} />
       </div>
       <div id="bottom">
         <p id="server_text">Enter a Game to Begin</p>

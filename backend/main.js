@@ -1,20 +1,10 @@
+//import connectDB from './db';
+const connectDB = require('./db.js')
 const Koa = require('koa');
 const app = new Koa();
 const server = require('http').createServer(app.callback());
 const io = require('socket.io')(server);
-
-// Serve static files (if needed)
 app.use(require('koa-static')(__dirname + '/public'));
-
-//mongodb config
-const mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost:27017/GeoHack', { useNewUrlParser: true, useUnifiedTopology: true });
-
-const Coordinate = mongoose.model('Coordinate', {
-    latitude: Number,
-    longitude: Number,
-    timestamp: Date
-  });
 
 // Set up Socket.IO connection
 io.on('connection', (socket) => {
@@ -30,12 +20,13 @@ server.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
 
-
+//Chromium 
 const puppeteer = require('puppeteer')
-//chromium instance
 const url = "https://www.geoguessr.com/signin";
 let lastLat = 0;
 let lastLong = 0;
+
+//Instance Func
 async function start() {
     await puppeteer
         .launch({
@@ -75,4 +66,7 @@ async function start() {
             });
         });
 }
+
+//Database config
+connectDB()
 start()

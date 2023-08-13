@@ -6,3 +6,5 @@ Stack
 - MongoDB
 - Koa.js
 - Socket.io
+- Puppeteer.js
+- MapBox GL/JS

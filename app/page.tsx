@@ -1,129 +1,128 @@
-
-"use client"
-import Image from 'next/image'
-import  {useEffect, useState} from 'react';
-import mapboxgl from 'mapbox-gl'
+'use client'
+import React, { useEffect, useState } from 'react';
+import mapboxgl from 'mapbox-gl';
 import io from 'socket.io-client';
-import {API_KEY} from '../config'
-import 'mapbox-gl/dist/mapbox-gl.css'; 
+import $ from 'jquery';
+import 'datatables.net-dt/css/jquery.dataTables.min.css';
+
+import 'datatables.net';
+import { API_KEY } from '../config';
+import 'mapbox-gl/dist/mapbox-gl.css';
+import './Home.css';
 
 export default function Home() {
+  const tableData = [
+    { column1: 'Row 1 Data 1', column2: 'Row 1 Data 2' },
+    { column1: 'Row 2 Data 1', column2: 'Row 2 Data 2' },
+    { column1: 'Row 3 Data 1', column2: 'Row 3 Data 2' },
+    
+  ];
+
   const [markerOn, setMarkerOn] = useState(false);
   const [marker, setMarker] = useState<mapboxgl.Marker | null>(null);
 
   useEffect(() => {
-    // Load Mapbox and other scripts here
     const mapboxScript = document.createElement('script');
     mapboxScript.src = 'https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.js';
     mapboxScript.async = true;
     document.head.appendChild(mapboxScript);
 
-    // Load Socket.IO script
     const socketIoScript = document.createElement('script');
     socketIoScript.src = 'https://cdn.socket.io/socket.io-3.0.0.js';
     socketIoScript.async = true;
     document.head.appendChild(socketIoScript);
 
-    //API
-    const map_mapbox_style = 'mapbox://styles/nickyhama/cl2f6k55u000014qqkyfv26ml';
-    const map_zoom = 3;
     mapboxgl.accessToken = API_KEY;
-
-    console.log("JHERERE111")
-
-    //Create new map
     const map = new mapboxgl.Map({
       container: 'map',
-      style: map_mapbox_style,
+      style: 'mapbox://styles/nickyhama/cl2f6k55u000014qqkyfv26ml',
       center: [0, 0],
-      zoom: map_zoom
+      zoom: 3
     });
 
-    //scokets
-    const socket = io("ws://localhost:3003", { transports : ['websocket'] })
+    const socket = io("ws://localhost:3003", { transports : ['websocket'] });
     socket.on('connect', function() {
-      console.log("connected")
-      
+      console.log("connected");
     });
-    
-    //disconnect
+
     socket.on('disconnect', function() {
-      console.log("disconnected")
+      console.log("disconnected");
     });
 
-   
-
-    socket.on('coords', longlat => 
-    {
-    
-      console.log('reset marker')
-      //let marker : mapboxgl.Marker;
-
+    socket.on('coords', longlat => {
       var long = longlat.substring(0, longlat.indexOf(","));
-      var lat =  longlat.substring(longlat.indexOf(",") +1, longlat.length - 1);
+      var lat = longlat.substring(longlat.indexOf(",") + 1, longlat.length - 1);
 
-      if (markerOn && marker)   
-      {
+      if (markerOn && marker) {
         marker.remove();
-        console.log("remove ")
       }
 
       const newMarker = new mapboxgl.Marker({
-          color: "#5E9DAD",
-          draggable: false
+        color: "#5E9DAD",
+        draggable: false
       }).setLngLat([long, lat])
-      .addTo(map)
+      .addTo(map);
 
       setMarker(newMarker);
       setMarkerOn(true);
-      //when it recieves the coords add it to the map
-      console.log(longlat)
       
-      flyToLoc(long,lat)
-    })
-
-    //change map pov
-    function flyToLoc(long: number, lat: number)
-{
-  
-    map.flyTo({
+      map.flyTo({
         center: [long, lat],
         zoom: 5,
         essential: true 
+      });
+    });
+
+    $(document).ready(function() {
+      $('#myTable').DataTable();
     });
 
     return () => {
-      if (marker) {
-        marker.remove()
+      if ($.fn.DataTable.isDataTable('#myTable')) {
+        $('#myTable').DataTable().destroy();
       }
-    }
-
-}
-
-
-    //this will run afterwards
-    return () => {
       document.head.removeChild(mapboxScript);
       document.head.removeChild(socketIoScript);
+      if (marker) {
+        marker.remove();
+      }
     };
   }, []);
 
   return (
     <>
-      <div>
-      {/* Your HTML content goes here */}
-      <pre id="ascii_title">
-        {/* ASCII art title */}
-      </pre>
-      <h1>GeoHack</h1>
-      <div className="maps">
-        <div id="map" style={{ width: '80%', height: '600px', display: 'inline-block'}} />
+      <header className="header">
+        <h1 className="logo">GeoHack</h1>
+        <button className="nav-button1">Map</button>
+        <button className="nav-button2">Settings</button>
+        <p className="status">Status</p>
+      </header>
+      <div className="home">
+        <div className="maps">
+          <div id="map" style={{ width: '100%', height: '600px' }} />
+        </div>
+        <div id="bottom">
+          <p id="server_text">Enter a Game to Begin</p>
+          <table id="myTable" className="display">
+            <thead>
+              <tr>
+                <th>Column 1</th>
+                <th>Column 2</th>
+                {/* Add more columns as needed */}
+              </tr>
+            </thead>
+            <tbody>
+            {tableData.map((row, index) => (
+                <tr key={index}>
+                  <td>{row.column1}</td>
+                  <td>{row.column2}</td>
+                  {/* ... more columns as needed */}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
-      <div id="bottom">
-        <p id="server_text">Enter a Game to Begin</p>
-      </div>
-    </div>
-      
     </>
-  )
+  );
 }

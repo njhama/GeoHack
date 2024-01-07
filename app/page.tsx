@@ -4,7 +4,7 @@ import Image from 'next/image'
 import  {useEffect, useState} from 'react';
 import mapboxgl from 'mapbox-gl'
 import io from 'socket.io-client';
-import {API_KEY1} from '../config.js'
+import {API_KEY} from '../config'
 import 'mapbox-gl/dist/mapbox-gl.css'; 
 
 export default function Home() {
@@ -27,7 +27,7 @@ export default function Home() {
     //API
     const map_mapbox_style = 'mapbox://styles/nickyhama/cl2f6k55u000014qqkyfv26ml';
     const map_zoom = 3;
-    mapboxgl.accessToken = API_KEY1;
+    mapboxgl.accessToken = API_KEY;
 
     console.log("JHERERE111")
 

@@ -1,6 +1,6 @@
 #GeoHack
-![Image 1](images/image1.jpg)
-![Image 2](images/image2.jpg)
+![Image 1](images/image1.png)
+![Image 2](images/image2.png)
 
 Legacy: https://github.com/njhama/GeoHackOld
 

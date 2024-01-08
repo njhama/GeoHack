@@ -17,9 +17,21 @@ export default function Home() {
     { column1: 'Row 3 Data 1', column2: 'Row 3 Data 2' },
     
   ];
-
+  const [currentView, setCurrentView] = useState('map');
   const [markerOn, setMarkerOn] = useState(false);
   const [marker, setMarker] = useState<mapboxgl.Marker | null>(null);
+  const [mapZoom, setMapZoom] = useState(3);
+  const [mapStyle, setMapStyle] = useState('mapbox://styles/nickyhama/cl2f6k55u000014qqkyfv26ml');
+
+  const handleMapView = () => {
+    setCurrentView('map');
+  };
+
+  const handleSettingsView = () => {
+    setCurrentView('settings');
+  };
+
+  
 
   useEffect(() => {
     const mapboxScript = document.createElement('script');
@@ -35,9 +47,9 @@ export default function Home() {
     mapboxgl.accessToken = API_KEY;
     const map = new mapboxgl.Map({
       container: 'map',
-      style: 'mapbox://styles/nickyhama/cl2f6k55u000014qqkyfv26ml',
+      style: mapStyle,
       center: [0, 0],
-      zoom: 3
+      zoom: mapZoom
     });
 
     const socket = io("ws://localhost:3003", { transports : ['websocket'] });
@@ -73,9 +85,14 @@ export default function Home() {
       });
     });
 
-    $(document).ready(function() {
+    if (currentView === 'map') {
+      //alert("MAP")
+      if ($.fn.DataTable.isDataTable('#myTable')) {
+          //alert("DESTROYED")
+          $('#myTable').DataTable().destroy();
+      }
       $('#myTable').DataTable();
-    });
+  }
 
     return () => {
       if ($.fn.DataTable.isDataTable('#myTable')) {
@@ -93,30 +110,69 @@ export default function Home() {
     <>
       <header className="header">
         <h1 className="logo">GeoHack</h1>
-        <button className="nav-button1">Map</button>
-        <button className="nav-button2">Settings</button>
+        <button 
+          className={`nav-button nav-button1 ${currentView === 'map' ? 'active' : ''}`}
+          onClick={handleMapView}
+        >
+          Map
+        </button>
+        <button 
+          className={`nav-button nav-button2 ${currentView === 'settings' ? 'active' : ''}`}
+          onClick={handleSettingsView}
+        >
+          Settings
+        </button>
         <p className="status">Status</p>
       </header>
+  
       <div className="home">
-        <div className="maps">
+        <div className="maps" style={{ display: currentView === 'map' ? 'block' : 'none' }}>
           <div id="map" style={{ width: '100%', height: '600px' }} />
         </div>
-        <div id="bottom">
+  
+        <div className="settings" style={{ display: currentView === 'settings' ? 'block' : 'none' }}>
+          <p>Settings View</p>
+           
+              <div>
+                <label>
+                  Map Zoom:
+                  <input
+                    type="number"
+                    value={mapZoom}
+                    onChange={(e) => setMapZoom(Number(e.target.value))}
+                  />
+                </label>
+              </div>
+              <div>
+                <label>
+                  Map Style:
+                  <select value={mapStyle} onChange={(e) => setMapStyle(e.target.value)}>
+                    <option value="mapbox://styles/mapbox/streets-v11">Streets</option>
+                    <option value="mapbox://styles/mapbox/outdoors-v11">Outdoors</option>
+                    <option value="mapbox://styles/mapbox/light-v10">Light</option>
+                    <option value="mapbox://styles/mapbox/dark-v10">Dark</option>
+                    <option value="mapbox://styles/mapbox/satellite-v9">Satellite</option>
+                  </select>
+                </label>
+              </div>
+        </div>
+  
+        <div id="bottom" style={{ display: currentView === 'map' ? 'block' : 'none' }}>
           <p id="server_text">Enter a Game to Begin</p>
           <table id="myTable" className="display">
             <thead>
               <tr>
                 <th>Column 1</th>
                 <th>Column 2</th>
-                {/* Add more columns as needed */}
+           
               </tr>
             </thead>
             <tbody>
-            {tableData.map((row, index) => (
+              {tableData.map((row, index) => (
                 <tr key={index}>
                   <td>{row.column1}</td>
                   <td>{row.column2}</td>
-                  {/* ... more columns as needed */}
+               
                 </tr>
               ))}
             </tbody>

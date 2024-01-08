@@ -92,7 +92,13 @@ body {
     margin-top: 20px;
 }
 
-/* Responsive design for smaller screens */
+#myTable {
+    width: 80%; 
+    margin: 0 auto; 
+    
+  }
+
+  
 @media (max-width: 768px) {
     .maps {
         width: 95%;
@@ -117,6 +123,25 @@ body {
 
 
 #bottom {
-    margin-top: 20px;
+    margin-top: 30px;
     background-color: white;
 }
+
+
+.dataTables_length {
+    padding-left: 20px; 
+  }
+  
+
+  .dataTables_wrapper .dataTables_length {
+    padding-left: 20px; 
+  }
+  
+ 
+  .dataTables_wrapper {
+    width: 90%; 
+    margin: 0 auto; 
+  }
+
+
+  

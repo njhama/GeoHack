@@ -4,25 +4,43 @@ import mapboxgl from 'mapbox-gl';
 import io from 'socket.io-client';
 import $ from 'jquery';
 import 'datatables.net-dt/css/jquery.dataTables.min.css';
-
 import 'datatables.net';
 import { API_KEY } from '../config';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import './Home.css';
 
 export default function Home() {
-  const tableData = [
-    { column1: 'Row 1 Data 1', column2: 'Row 1 Data 2' },
-    { column1: 'Row 2 Data 1', column2: 'Row 2 Data 2' },
-    { column1: 'Row 3 Data 1', column2: 'Row 3 Data 2' },
-    
-  ];
   const [currentView, setCurrentView] = useState('map');
   const [markerOn, setMarkerOn] = useState(false);
   const [marker, setMarker] = useState<mapboxgl.Marker | null>(null);
   const [mapZoom, setMapZoom] = useState(3);
   const [mapStyle, setMapStyle] = useState('mapbox://styles/nickyhama/cl2f6k55u000014qqkyfv26ml');
   const mapRef = useRef<mapboxgl.Map | null>(null);
+
+  // Dummy data 
+  const tableData = [
+    { latitude: '40.7128', longitude: '-74.0060', imageLink: 'http://example.com/image1.jpg' },
+    { latitude: '34.0522', longitude: '-118.2437', imageLink: 'http://example.com/image2.jpg' },
+    { latitude: '37.7749', longitude: '-122.4194', imageLink: 'http://example.com/image3.jpg' },
+    { latitude: '51.5074', longitude: '-0.1278', imageLink: 'http://example.com/image4.jpg' },
+    { latitude: '48.8566', longitude: '2.3522', imageLink: 'http://example.com/image5.jpg' },
+    { latitude: '35.6895', longitude: '139.6917', imageLink: 'http://example.com/image6.jpg' },
+    { latitude: '55.7558', longitude: '37.6173', imageLink: 'http://example.com/image7.jpg' },
+    { latitude: '39.9042', longitude: '116.4074', imageLink: 'http://example.com/image8.jpg' },
+    { latitude: '-33.8688', longitude: '151.2093', imageLink: 'http://example.com/image9.jpg' },
+    { latitude: '-23.5505', longitude: '-46.6333', imageLink: 'http://example.com/image10.jpg' },
+    { latitude: '19.4326', longitude: '-99.1332', imageLink: 'http://example.com/image11.jpg' },
+    { latitude: '28.6139', longitude: '77.2090', imageLink: 'http://example.com/image12.jpg' },
+    { latitude: '-34.6037', longitude: '-58.3816', imageLink: 'http://example.com/image13.jpg' },
+    { latitude: '41.9028', longitude: '12.4964', imageLink: 'http://example.com/image14.jpg' },
+    { latitude: '30.0444', longitude: '31.2357', imageLink: 'http://example.com/image15.jpg' },
+    { latitude: '-26.2041', longitude: '28.0473', imageLink: 'http://example.com/image16.jpg' },
+    { latitude: '1.3521', longitude: '103.8198', imageLink: 'http://example.com/image17.jpg' },
+    { latitude: '51.1657', longitude: '10.4515', imageLink: 'http://example.com/image18.jpg' },
+    { latitude: '40.4637', longitude: '-3.7492', imageLink: 'http://example.com/image19.jpg' },
+    { latitude: '36.2048', longitude: '138.2529', imageLink: 'http://example.com/image20.jpg' }
+  ];
+
   const handleMapView = () => {
     setCurrentView('map');
   };
@@ -31,8 +49,6 @@ export default function Home() {
     setCurrentView('settings');
   };
 
-  
-  //no dependencies
   useEffect(() => {
     const mapboxScript = document.createElement('script');
     mapboxScript.src = 'https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.js';
@@ -45,14 +61,14 @@ export default function Home() {
     document.head.appendChild(socketIoScript);
 
     mapboxgl.accessToken = API_KEY;
-    const map = new mapboxgl.Map({
+    const mapInstance = new mapboxgl.Map({
       container: 'map',
       style: mapStyle,
       center: [0, 0],
       zoom: mapZoom
     });
 
-    mapRef.current = map;
+    mapRef.current = mapInstance;
 
     const socket = io("ws://localhost:3003", { transports : ['websocket'] });
     socket.on('connect', function() {
@@ -74,29 +90,27 @@ export default function Home() {
       const newMarker = new mapboxgl.Marker({
         color: "#5E9DAD",
         draggable: false
-      }).setLngLat([long, lat])
-      .addTo(map);
+      }).setLngLat([long, lat]).addTo(mapInstance);
 
       setMarker(newMarker);
       setMarkerOn(true);
       
-      map.flyTo({
+      mapInstance.flyTo({
         center: [long, lat],
         zoom: 5,
         essential: true 
       });
     });
 
-    if (currentView === 'map') {
-      //alert("MAP")
+    const timeoutId = setTimeout(() => {
       if ($.fn.DataTable.isDataTable('#myTable')) {
-          //alert("DESTROYED")
-          $('#myTable').DataTable().destroy();
+        $('#myTable').DataTable().destroy();
       }
-      $('#myTable').DataTable();
-  }
+      $('#myTable').DataTable(); // Init
+    }, 100);
 
     return () => {
+      clearTimeout(timeoutId)
       if ($.fn.DataTable.isDataTable('#myTable')) {
         $('#myTable').DataTable().destroy();
       }
@@ -108,7 +122,6 @@ export default function Home() {
     };
   }, []);
 
-  //when mapzoom and mapstyle changes
   useEffect(() => {
     if (mapRef.current) {
       mapRef.current.setStyle(mapStyle);
@@ -142,7 +155,6 @@ export default function Home() {
   
         <div className="settings" style={{ display: currentView === 'settings' ? 'block' : 'none' }}>
           <p>Settings View</p>
-           
               <div>
                 <label>
                   Map Zoom:
@@ -168,27 +180,30 @@ export default function Home() {
         </div>
   
         <div id="bottom" style={{ display: currentView === 'map' ? 'block' : 'none' }}>
-          <p id="server_text">Enter a Game to Begin</p>
+         
           <table id="myTable" className="display">
             <thead>
               <tr>
-                <th>Column 1</th>
-                <th>Column 2</th>
-           
+                <th>Latitude</th>
+                <th>Longitude</th>
+                <th>Image Link</th>
               </tr>
             </thead>
             <tbody>
               {tableData.map((row, index) => (
                 <tr key={index}>
-                  <td>{row.column1}</td>
-                  <td>{row.column2}</td>
-               
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  <td>{row.latitude}</td>
+                  <td>{row.longitude}</td>
+                  
+                  <td><a href={row.imageLink} target="_blank" rel="noopener noreferrer">https://s3.amazonaws.com/geohack/screenshots/{`${row.latitude}_${row.longitude}`}.png
+</a></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
-    </>
-  );
-}
+      </>
+    );
+  }
+                  

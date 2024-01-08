@@ -6,6 +6,10 @@ const server = require('http').createServer(app.callback());
 const io = require('socket.io')(server);
 app.use(require('koa-static')(__dirname + '/public'));
 
+//for sc
+const fs = require('fs');
+const path = require('path');
+
 // Set up Socket.IO connection
 io.on('connection', (socket) => {
   console.log('A user connected');
@@ -56,6 +60,22 @@ async function start() {
                         let newDate = new Date().toLocaleTimeString();
                         io.emit("coords", `${long},${lat}`);
                         console.log(`[${newDate}] Latitude: ${lat} Longitude: ${long}`);
+
+                        //sc
+                        const sanitizedDate = newDate.replace(/:/g, '-').replace(/,/g, '');
+                        const filename = `screenshot-${sanitizedDate}.png`;
+
+                        // Ensure the directory exists
+                        const dir = path.join(__dirname, 'screenshots');
+                        if (!fs.existsSync(dir)){
+                            fs.mkdirSync(dir, { recursive: true });
+                        }
+
+                        // Save the screenshot
+                        const filepath = path.join(dir, filename);
+                        await page.screenshot({ path: filepath, fullPage: true });
+                        console.log(`Screenshot saved at ${filepath}`);
+
                         saveCoordinate(long, lat)
                     }
                 }

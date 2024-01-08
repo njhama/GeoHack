@@ -107,10 +107,13 @@ export default function Home() {
 
   //port event handler
   useEffect(() => {
+   
+    const socket = io(`ws://localhost:${port}`, { transports : ['websocket'] });
     
-    const socket = io("ws://localhost:${port}", { transports : ['websocket'] });
     socket.on('connect', function() {
+
       setIsConnected(true);
+      //alert("Connected!")
       console.log("connected");
     });
 
@@ -120,6 +123,7 @@ export default function Home() {
     });
 
     socket.on('coords', longlat => {
+      //alert("RECEIVED")
       var long = longlat.substring(0, longlat.indexOf(","));
       var lat = longlat.substring(longlat.indexOf(",") + 1, longlat.length - 1);
 
@@ -127,25 +131,28 @@ export default function Home() {
         marker.remove();
       }
       
-      if (mapInst) {
+      if (mapRef.current) {
         const newMarker = new mapboxgl.Marker({
           color: "#5E9DAD",
           draggable: false
-        }).setLngLat([long, lat]).addTo(mapInst);
+        }).setLngLat([long, lat]).addTo(mapRef.current);
   
         setMarker(newMarker);
         setMarkerOn(true);
         
-        mapInst.flyTo({
+        mapRef.current.flyTo({
           center: [long, lat],
           zoom: 5,
           essential: true 
         });
       }
+      else {
+        alert("Fatal error: No instnace open")
+      }
       
     });
     
-  }, [port]);
+  }, [port, mapInst]);
 
 
   return (

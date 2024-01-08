@@ -62,6 +62,7 @@ async function start() {
                         console.log(`[${newDate}] Latitude: ${lat} Longitude: ${long}`);
 
                         //sc
+                        
                         const sanitizedDate = newDate.replace(/:/g, '-').replace(/,/g, '');
                         const filename = `screenshot-${sanitizedDate}.png`;
 

@@ -16,6 +16,10 @@ export default function Home() {
   const [mapZoom, setMapZoom] = useState(3);
   const [mapStyle, setMapStyle] = useState('mapbox://styles/nickyhama/cl2f6k55u000014qqkyfv26ml');
   const mapRef = useRef<mapboxgl.Map | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
+  const [port, setPort] = useState(3003);
+  const [mapInst, setMapInst] = useState<mapboxgl.Map | null>(null);
+
 
   // Dummy data 
   const tableData = [
@@ -69,38 +73,7 @@ export default function Home() {
     });
 
     mapRef.current = mapInstance;
-
-    const socket = io("ws://localhost:3003", { transports : ['websocket'] });
-    socket.on('connect', function() {
-      console.log("connected");
-    });
-
-    socket.on('disconnect', function() {
-      console.log("disconnected");
-    });
-
-    socket.on('coords', longlat => {
-      var long = longlat.substring(0, longlat.indexOf(","));
-      var lat = longlat.substring(longlat.indexOf(",") + 1, longlat.length - 1);
-
-      if (markerOn && marker) {
-        marker.remove();
-      }
-
-      const newMarker = new mapboxgl.Marker({
-        color: "#5E9DAD",
-        draggable: false
-      }).setLngLat([long, lat]).addTo(mapInstance);
-
-      setMarker(newMarker);
-      setMarkerOn(true);
-      
-      mapInstance.flyTo({
-        center: [long, lat],
-        zoom: 5,
-        essential: true 
-      });
-    });
+    setMapInst(mapInstance);
 
     const timeoutId = setTimeout(() => {
       if ($.fn.DataTable.isDataTable('#myTable')) {
@@ -122,12 +95,58 @@ export default function Home() {
     };
   }, []);
 
+
+  //map settings handler
   useEffect(() => {
     if (mapRef.current) {
       mapRef.current.setStyle(mapStyle);
       mapRef.current.setZoom(mapZoom);
     }
   }, [mapZoom, mapStyle]);
+
+
+  //port event handler
+  useEffect(() => {
+    
+    const socket = io("ws://localhost:${port}", { transports : ['websocket'] });
+    socket.on('connect', function() {
+      setIsConnected(true);
+      console.log("connected");
+    });
+
+    socket.on('disconnect', function() {
+      setIsConnected(false);
+      console.log("disconnected");
+    });
+
+    socket.on('coords', longlat => {
+      var long = longlat.substring(0, longlat.indexOf(","));
+      var lat = longlat.substring(longlat.indexOf(",") + 1, longlat.length - 1);
+
+      if (markerOn && marker) {
+        marker.remove();
+      }
+      
+      if (mapInst) {
+        const newMarker = new mapboxgl.Marker({
+          color: "#5E9DAD",
+          draggable: false
+        }).setLngLat([long, lat]).addTo(mapInst);
+  
+        setMarker(newMarker);
+        setMarkerOn(true);
+        
+        mapInst.flyTo({
+          center: [long, lat],
+          zoom: 5,
+          essential: true 
+        });
+      }
+      
+    });
+    
+  }, [port]);
+
 
   return (
     <>
@@ -145,7 +164,9 @@ export default function Home() {
         >
           Settings
         </button>
-        <p className="status">Status</p>
+        <h2 className="status" style={{ color: isConnected ? 'green' : 'red' }}>
+          {isConnected ? 'Online' : 'Offline'}
+        </h2>
     </header>
   
       <div className="home">
@@ -154,7 +175,7 @@ export default function Home() {
         </div>
   
         <div className="settings" style={{ display: currentView === 'settings' ? 'block' : 'none' }}>
-          <p>Settings View</p>
+          <h1>Settings View</h1>
               <div>
                 <label>
                   Map Zoom:
@@ -177,6 +198,16 @@ export default function Home() {
                   </select>
                 </label>
               </div>
+              <div>
+            <label>
+              Socket Port:
+              <input
+                type="number"
+                value={port}
+                onChange={(e) => setPort(Number(e.target.value))}
+              />
+            </label>
+          </div>
         </div>
   
         <div id="bottom" style={{ display: currentView === 'map' ? 'block' : 'none' }}>

@@ -169,3 +169,54 @@ body {
     padding-top: 20px; 
   }
   
+
+
+  /* Ensure the body takes full viewport height */
+body, html {
+    height: 100%;
+  }
+  
+  /* Home container to fill available height */
+  .home {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  
+  /* Maps and settings to take up only necessary space */
+  .maps, .settings {
+    flex-grow: 0;
+    flex-shrink: 0;
+  }
+  
+  /* Bottom section to fill remaining space */
+  #bottom {
+    flex-grow: 1;
+    overflow: auto; /* Enable scroll if content overflows */
+    padding: 20px; /* Add some padding */
+    background-color: white; /* Background color */
+  }
+  
+  /* Style settings section */
+  .settings {
+    padding: 20px;
+    background-color: #f8f8f8; /* Light background for settings */
+    border-bottom: 2px solid #ddd; /* Separator */
+  }
+  
+  /* Style form elements in settings */
+  .settings label {
+    display: block;
+    margin-bottom: 10px;
+  }
+  
+  .settings input, .settings select {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+  
+ 
+  

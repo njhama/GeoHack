@@ -56,9 +56,7 @@ body {
     
 }
 
-.nav-button:hover {
-    background-color: #e1e1e1;
-}
+
 
 .status {
     grid-column-start: 6;
@@ -134,6 +132,7 @@ body {
   
 
   .dataTables_wrapper .dataTables_length {
+    padding-top: 20px;
     padding-left: 20px; 
   }
   
@@ -144,4 +143,29 @@ body {
   }
 
 
+  .nav-button.active {
+    
+    color: white;
+  }
+
+  .nav-button {
+    position: relative; 
+  }
+  
+  .nav-button.active::after {
+    content: '';
+    display: block;
+    width: 70%; 
+    height: 2px; 
+    background-color: white; 
+    position: absolute;
+    left: 15%;
+    bottom: -5px; 
+    text-align: center;
+  }
+
+
+.dataTables_wrapper .dataTables_filter {
+    padding-top: 20px; 
+  }
   

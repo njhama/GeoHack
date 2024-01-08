@@ -146,7 +146,7 @@ export default function Home() {
           Settings
         </button>
         <p className="status">Status</p>
-      </header>
+    </header>
   
       <div className="home">
         <div className="maps" style={{ display: currentView === 'map' ? 'block' : 'none' }}>

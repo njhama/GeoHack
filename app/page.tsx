@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import mapboxgl from 'mapbox-gl';
 import io from 'socket.io-client';
 import $ from 'jquery';
@@ -22,7 +22,7 @@ export default function Home() {
   const [marker, setMarker] = useState<mapboxgl.Marker | null>(null);
   const [mapZoom, setMapZoom] = useState(3);
   const [mapStyle, setMapStyle] = useState('mapbox://styles/nickyhama/cl2f6k55u000014qqkyfv26ml');
-
+  const mapRef = useRef<mapboxgl.Map | null>(null);
   const handleMapView = () => {
     setCurrentView('map');
   };
@@ -32,7 +32,7 @@ export default function Home() {
   };
 
   
-
+  //no dependencies
   useEffect(() => {
     const mapboxScript = document.createElement('script');
     mapboxScript.src = 'https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.js';
@@ -51,6 +51,8 @@ export default function Home() {
       center: [0, 0],
       zoom: mapZoom
     });
+
+    mapRef.current = map;
 
     const socket = io("ws://localhost:3003", { transports : ['websocket'] });
     socket.on('connect', function() {
@@ -105,6 +107,14 @@ export default function Home() {
       }
     };
   }, []);
+
+  //when mapzoom and mapstyle changes
+  useEffect(() => {
+    if (mapRef.current) {
+      mapRef.current.setStyle(mapStyle);
+      mapRef.current.setZoom(mapZoom);
+    }
+  }, [mapZoom, mapStyle]);
 
   return (
     <>

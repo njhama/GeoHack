@@ -1,10 +1,20 @@
 //import connectDB from './db';
-const connectDB = require('./db.js')
+//const connectDB = require('./db.js')
 const Koa = require('koa');
 const app = new Koa();
 const server = require('http').createServer(app.callback());
 const io = require('socket.io')(server);
 app.use(require('koa-static')(__dirname + '/public'));
+const awsConfig = require('./aws-config');
+//for aws
+require('dotenv').config();
+
+const AWS = require('aws-sdk');
+AWS.config.update({
+  region: 'us-west-1',
+});
+AWS.config.update(awsConfig);
+const s3 = new AWS.S3();
 
 //for sc
 const fs = require('fs');
@@ -32,6 +42,7 @@ let lastLong = 0;
 
 //Instance Func
 async function start() {
+    console.log(awsConfig)
     await puppeteer
         .launch({
             headless: false,
@@ -55,30 +66,44 @@ async function start() {
                     let long = longlat.substring(longlat.indexOf(",") + 1, longlat.length - 1);
 
                     if (Math.round(lat) !== lastLat && Math.round(long) !== lastLong) {
-                        lastLat = Math.round(lat);
-                        lastLong = Math.round(long);
-                        let newDate = new Date().toLocaleTimeString();
-                        io.emit("coords", `${long},${lat}`);
-                        console.log(`[${newDate}] Latitude: ${lat} Longitude: ${long}`);
-
-                        //sc
-                        
-                        const sanitizedDate = newDate.replace(/:/g, '-').replace(/,/g, '');
-                        const filename = `screenshot-${sanitizedDate}.png`;
-
-                        // Ensure the directory exists
-                        const dir = path.join(__dirname, 'screenshots');
-                        if (!fs.existsSync(dir)){
-                            fs.mkdirSync(dir, { recursive: true });
-                        }
-
-                        // Save the screenshot
-                        const filepath = path.join(dir, filename);
-                        await page.screenshot({ path: filepath, fullPage: true });
-                        console.log(`Screenshot saved at ${filepath}`);
-
-                        saveCoordinate(long, lat)
-                    }
+                      lastLat = Math.round(lat);
+                      lastLong = Math.round(long);
+                      let newDate = new Date().toLocaleTimeString();
+                      io.emit("coords", `${long},${lat}`);
+                      console.log(`[${newDate}] Latitude: ${lat} Longitude: ${long}`);
+                  
+                      // Delay
+                      await page.waitForTimeout(3000);
+                  
+                      const screenshotBuffer = await page.screenshot({ fullPage: true });
+                  
+                      // Sanitize
+                      const sanitizedDate = newDate.replace(/:/g, '-').replace(/,/g, '');
+                      const filename = `screenshot-${sanitizedDate}.png`;
+                  
+                      
+                      const bucketName = 'geohackbucket';
+                      const fileKey = `screenshots/${filename}`;
+                  
+                      // Upload to S3
+                      const params = {
+                          Bucket: bucketName,
+                          Key: fileKey,
+                          Body: screenshotBuffer,
+                          ContentType: 'image/png'
+                      };
+                  
+                      s3.upload(params, function(err, data) {
+                          if (err) {
+                              console.error('Error uploading to S3:', err);
+                          } else {
+                              console.log(`Screenshot uploaded successfully. URL: ${data.Location}`);
+                          }
+                      });
+                  
+                      saveCoordinate(long, lat);
+                  }
+                  
                 }
             });
 
@@ -107,5 +132,5 @@ async function saveCoordinate(long, lat)
 }
 
 //Database config
-connectDB()
+//connectDB()
 start()

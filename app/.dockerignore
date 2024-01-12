@@ -1,0 +1,7 @@
+node_modules/
+Thumbs.db
+.env*
+npm-debug.log
+yarn-error.log
+tmp/
+config.js

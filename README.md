@@ -16,5 +16,5 @@
 - Socket.io
 - Puppeteer.js
 - MapBox GL/JS
-- AWS
+- AWS S3
 - Docker

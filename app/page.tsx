@@ -1,10 +1,10 @@
 'use client'
 import React, { useEffect, useState, useRef } from 'react';
+import dynamic from 'next/dynamic';
 import mapboxgl from 'mapbox-gl';
 import io from 'socket.io-client';
 import $ from 'jquery';
-import 'datatables.net-dt/css/jquery.dataTables.min.css';
-import 'datatables.net';
+
 import { API_KEY } from '../config';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import './Home.css';
@@ -76,17 +76,12 @@ export default function Home() {
     setMapInst(mapInstance);
 
     const timeoutId = setTimeout(() => {
-      if ($.fn.DataTable.isDataTable('#myTable')) {
-        $('#myTable').DataTable().destroy();
-      }
-      $('#myTable').DataTable(); // Init
+      
     }, 100);
 
     return () => {
       clearTimeout(timeoutId)
-      if ($.fn.DataTable.isDataTable('#myTable')) {
-        $('#myTable').DataTable().destroy();
-      }
+      
       document.head.removeChild(mapboxScript);
       document.head.removeChild(socketIoScript);
       if (marker) {
